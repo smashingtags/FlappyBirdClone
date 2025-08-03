@@ -1,0 +1,103 @@
+# iOS Build Environment for React Native
+# Note: This is designed for macOS runners in GitHub Actions
+# For local development on macOS, you can use this as a reference
+
+FROM node:18
+
+# Install system dependencies (for macOS runners)
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    python3 \
+    python3-pip \
+    ruby \
+    ruby-dev \
+    && rm -rf /var/lib/apt/lists/* || true
+
+# Install React Native CLI
+RUN npm install -g @react-native-community/cli
+
+# Install CocoaPods and Fastlane
+RUN gem install cocoapods fastlane
+
+# Create working directory
+WORKDIR /app
+
+# Copy package files for dependency caching
+COPY package*.json ./
+
+# Install Node.js dependencies
+RUN npm ci && npm cache clean --force
+
+# Copy application code
+COPY . .
+
+# Install iOS dependencies
+RUN cd ios && pod install --repo-update || true
+
+# Create iOS build script
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Building iOS IPA..."\n\
+\n\
+# Install pods if not already installed\n\
+cd ios\n\
+pod install --repo-update\n\
+cd ..\n\
+\n\
+# Build iOS app\n\
+npx react-native run-ios --configuration Release --device\n\
+\n\
+echo "iOS build completed successfully!"\n\
+' > /app/build-ios.sh && chmod +x /app/build-ios.sh
+
+# Create iOS archive script using xcodebuild
+RUN echo '#!/bin/bash\n\
+set -e\n\
+echo "Creating iOS Archive..."\n\
+\n\
+cd ios\n\
+\n\
+# Clean build folder\n\
+xcodebuild clean -workspace FlappyBirdClone.xcworkspace -scheme FlappyBirdClone\n\
+\n\
+# Archive the app\n\
+xcodebuild archive \\\n\
+  -workspace FlappyBirdClone.xcworkspace \\\n\
+  -scheme FlappyBirdClone \\\n\
+  -configuration Release \\\n\
+  -archivePath build/FlappyBirdClone.xcarchive \\\n\
+  CODE_SIGNING_ALLOWED=NO\n\
+\n\
+# Export IPA\n\
+xcodebuild -exportArchive \\\n\
+  -archivePath build/FlappyBirdClone.xcarchive \\\n\
+  -exportPath build \\\n\
+  -exportOptionsPlist exportOptions.plist\n\
+\n\
+echo "iOS archive completed successfully!"\n\
+echo "IPA location: ios/build/FlappyBirdClone.ipa"\n\
+' > /app/build-ios-archive.sh && chmod +x /app/build-ios-archive.sh
+
+# Create export options plist for iOS
+RUN echo '<?xml version="1.0" encoding="UTF-8"?>\n\
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">\n\
+<plist version="1.0">\n\
+<dict>\n\
+    <key>method</key>\n\
+    <string>development</string>\n\
+    <key>teamID</key>\n\
+    <string>YOUR_TEAM_ID</string>\n\
+    <key>compileBitcode</key>\n\
+    <false/>\n\
+    <key>stripSwiftSymbols</key>\n\
+    <true/>\n\
+    <key>uploadBitcode</key>\n\
+    <false/>\n\
+    <key>uploadSymbols</key>\n\
+    <true/>\n\
+</dict>\n\
+</plist>' > /app/ios/exportOptions.plist
+
+# Default command
+CMD ["./build-ios.sh"]
