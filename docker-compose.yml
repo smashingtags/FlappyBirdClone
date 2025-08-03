@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Base development environment
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    ports:
+      - "8081:8081"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm start
+
+  # Android build service
+  android-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.android
+    volumes:
+      - ./android/app/build/outputs:/app/android/app/build/outputs
+      - ./build-artifacts:/app/build-artifacts
+    environment:
+      - NODE_ENV=production
+      - ANDROID_HOME=/opt/android-sdk
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+    command: ./build-android.sh
+
+  # Android AAB build service
+  android-aab-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.android
+    volumes:
+      - ./android/app/build/outputs:/app/android/app/build/outputs
+      - ./build-artifacts:/app/build-artifacts
+    environment:
+      - NODE_ENV=production
+      - ANDROID_HOME=/opt/android-sdk
+      - ANDROID_SDK_ROOT=/opt/android-sdk
+    command: ./build-android-aab.sh
+
+  # iOS build service (for macOS hosts only)
+  ios-build:
+    build:
+      context: .
+      dockerfile: Dockerfile.ios
+    volumes:
+      - ./ios/build:/app/ios/build
+      - ./build-artifacts:/app/build-artifacts
+    environment:
+      - NODE_ENV=production
+    command: ./build-ios.sh
+    platform: linux/amd64
+
+  # Test runner service
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=test
+    command: npm test
+
+  # Linting service
+  lint:
+    build:
+      context: .
+      dockerfile: Dockerfile.base
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+    command: npm run lint
+
+volumes:
+  node_modules:
+  build_artifacts:
+
+networks:
+  default:
+    driver: bridge

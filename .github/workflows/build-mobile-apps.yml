@@ -1,0 +1,218 @@
+name: Build Mobile Apps
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  release:
+    types: [ published ]
+
+env:
+  NODE_VERSION: '18'
+  JAVA_VERSION: '11'
+
+jobs:
+  # Lint and Test Job
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linter
+        run: npm run lint
+
+      - name: Run tests
+        run: npm test
+
+  # Android Build Job
+  build-android:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Make build script executable
+        run: chmod +x scripts/build-android.sh
+
+      - name: Build Android APK
+        run: ./scripts/build-android.sh
+
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: build-artifacts/app-release.apk
+          retention-days: 30
+
+      - name: Make AAB build script executable
+        run: chmod +x scripts/build-android-aab.sh
+
+      - name: Build Android AAB
+        run: ./scripts/build-android-aab.sh
+
+      - name: Upload Android AAB
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-aab
+          path: build-artifacts/app-release.aab
+          retention-days: 30
+
+  # Android Build with Docker
+  build-android-docker:
+    needs: lint-and-test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Android with Docker
+        run: |
+          docker-compose build android-build
+          docker-compose run --rm android-build
+
+      - name: Extract artifacts from Docker
+        run: |
+          mkdir -p build-artifacts
+          docker-compose run --rm -v $(pwd)/build-artifacts:/app/build-artifacts android-build cp /app/android/app/build/outputs/apk/release/app-release.apk /app/build-artifacts/ || true
+
+      - name: Upload Docker Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-docker
+          path: build-artifacts/app-release.apk
+          retention-days: 30
+
+  # iOS Build Job (macOS only)
+  build-ios:
+    needs: lint-and-test
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.0'
+          bundler-cache: true
+
+      - name: Install CocoaPods
+        run: gem install cocoapods
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Cache CocoaPods
+        uses: actions/cache@v4
+        with:
+          path: ios/Pods
+          key: ${{ runner.os }}-pods-${{ hashFiles('**/Podfile.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pods-
+
+      - name: Install iOS dependencies
+        run: |
+          cd ios
+          pod install --repo-update
+
+      - name: Make build script executable
+        run: chmod +x scripts/build-ios.sh
+
+      - name: Build iOS IPA
+        run: ./scripts/build-ios.sh
+        env:
+          # Add signing environment variables here when ready
+          # MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          # FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
+          CODE_SIGNING_REQUIRED: "NO"
+          CODE_SIGNING_ALLOWED: "NO"
+
+      - name: Upload iOS IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: build-artifacts/FlappyBirdClone.ipa
+          retention-days: 30
+
+  # Release Job (only on release)
+  release:
+    if: github.event_name == 'release'
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Android APK
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: ./artifacts
+
+      - name: Download Android AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: android-aab
+          path: ./artifacts
+
+      - name: Download iOS IPA
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: ./artifacts
+
+      - name: Upload Release Assets
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./artifacts/app-release.apk
+            ./artifacts/app-release.aab
+            ./artifacts/FlappyBirdClone.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
