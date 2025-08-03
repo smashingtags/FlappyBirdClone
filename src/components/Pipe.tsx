@@ -15,16 +15,16 @@ const Pipe: React.FC<PipeProps> = ({ pipe }) => {
         <View style={styles.pipeBody} />
         <View style={styles.pipeCapTop} />
       </View>
-      
+
       {/* Bottom Pipe */}
-      <View 
+      <View
         style={[
-          styles.pipe, 
-          styles.bottomPipe, 
-          { 
+          styles.pipe,
+          styles.bottomPipe,
+          {
             height: pipe.bottomHeight,
-            bottom: SCREEN_DIMENSIONS.GROUND_HEIGHT 
-          }
+            bottom: SCREEN_DIMENSIONS.GROUND_HEIGHT,
+          },
         ]}
       >
         <View style={styles.pipeCapBottom} />

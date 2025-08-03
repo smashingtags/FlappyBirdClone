@@ -24,10 +24,7 @@
       "@/types/*": ["types/*"]
     }
   },
-  "include": [
-    "src/**/*",
-    "index.js"
-  ],
+  "include": ["src/**/*", "index.js"],
   "exclude": [
     "node_modules",
     "babel.config.js",

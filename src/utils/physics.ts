@@ -24,14 +24,21 @@ export const calculateBirdRotation = (velocity: number): number => {
   return Math.min(Math.max(velocity * 3, -20), 45);
 };
 
-export const generateRandomPipeHeight = (): { topHeight: number; bottomHeight: number } => {
+export const generateRandomPipeHeight = (): {
+  topHeight: number;
+  bottomHeight: number;
+} => {
   const minGapY = SCREEN_HEIGHT * 0.2;
   const maxGapY = SCREEN_HEIGHT * 0.8;
   const gapY = Math.random() * (maxGapY - minGapY) + minGapY;
-  
+
   return {
     topHeight: gapY - PHYSICS_CONFIG.PIPE_GAP / 2,
-    bottomHeight: SCREEN_HEIGHT - gapY - PHYSICS_CONFIG.PIPE_GAP / 2 - SCREEN_DIMENSIONS.GROUND_HEIGHT,
+    bottomHeight:
+      SCREEN_HEIGHT -
+      gapY -
+      PHYSICS_CONFIG.PIPE_GAP / 2 -
+      SCREEN_DIMENSIONS.GROUND_HEIGHT,
   };
 };
 

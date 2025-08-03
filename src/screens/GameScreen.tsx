@@ -1,11 +1,10 @@
 import React from 'react';
-import { 
-  View, 
-  TouchableOpacity, 
-  Text, 
-  StyleSheet, 
-  ImageBackground,
-  StatusBar 
+import {
+  View,
+  TouchableOpacity,
+  Text,
+  StyleSheet,
+  StatusBar,
 } from 'react-native';
 import { useGamePhysics } from '../hooks/useGamePhysics';
 import Bird from '../components/Bird';
@@ -14,15 +13,15 @@ import Ground from '../components/Ground';
 import ScoreDisplay from '../components/ScoreDisplay';
 
 const GameScreen: React.FC = () => {
-  const { 
-    bird, 
-    pipes, 
-    score, 
-    highScore, 
-    gameState, 
-    jump, 
-    startGame, 
-    resetGame 
+  const {
+    bird,
+    pipes,
+    score,
+    highScore,
+    gameState,
+    jump,
+    startGame,
+    resetGame,
   } = useGamePhysics();
 
   const handleScreenPress = () => {
@@ -38,8 +37,8 @@ const GameScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       <StatusBar hidden />
-      <TouchableOpacity 
-        style={styles.gameArea} 
+      <TouchableOpacity
+        style={styles.gameArea}
         onPress={handleScreenPress}
         activeOpacity={1}
       >
@@ -51,11 +50,11 @@ const GameScreen: React.FC = () => {
 
         {/* Game Objects */}
         <Bird bird={bird} />
-        
-        {pipes.map(pipe => (
+
+        {pipes.map((pipe) => (
           <Pipe key={pipe.id} pipe={pipe} />
         ))}
-        
+
         <Ground />
 
         {/* Score Display */}
@@ -70,10 +69,10 @@ const GameScreen: React.FC = () => {
           <View style={styles.overlay}>
             <Text style={styles.titleText}>Sky Dash</Text>
             <Text style={styles.instructionText}>Tap to Start</Text>
-            <ScoreDisplay 
-              score={0} 
-              highScore={highScore} 
-              showHighScore={true} 
+            <ScoreDisplay
+              score={0}
+              highScore={highScore}
+              showHighScore={true}
             />
           </View>
         )}

@@ -2,11 +2,11 @@ name: Build Mobile Apps
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [main, develop]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   release:
-    types: [ published ]
+    types: [published]
 
 env:
   NODE_VERSION: '18'
@@ -173,8 +173,8 @@ jobs:
           # Add signing environment variables here when ready
           # MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           # FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD: ${{ secrets.FASTLANE_APPLE_APPLICATION_SPECIFIC_PASSWORD }}
-          CODE_SIGNING_REQUIRED: "NO"
-          CODE_SIGNING_ALLOWED: "NO"
+          CODE_SIGNING_REQUIRED: 'NO'
+          CODE_SIGNING_ALLOWED: 'NO'
 
       - name: Upload iOS IPA
         uses: actions/upload-artifact@v4

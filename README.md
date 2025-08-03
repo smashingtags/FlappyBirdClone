@@ -25,11 +25,13 @@ Before you begin, ensure you have the following installed:
 ### Installation
 
 1. **Clone or navigate to the project directory**:
+
    ```bash
    cd FlappyBirdClone
    ```
 
 2. **Install dependencies**:
+
    ```bash
    npm install
    ```
@@ -42,6 +44,7 @@ Before you begin, ensure you have the following installed:
 ### Running the App
 
 #### Android
+
 ```bash
 # Start Metro bundler
 npm start
@@ -51,6 +54,7 @@ npm run android
 ```
 
 #### iOS (Mac only)
+
 ```bash
 # Start Metro bundler
 npm start
@@ -87,18 +91,21 @@ src/
 ## 🎯 Game Mechanics
 
 ### Physics
+
 - **Gravity**: 0.5 pixels/frame downward acceleration
 - **Jump**: -8 pixels/frame upward velocity on tap
 - **Terminal Velocity**: Maximum 10 pixels/frame fall speed
 - **Bird Rotation**: Tilts based on velocity for realistic movement
 
 ### Collision Detection
+
 - **AABB (Axis-Aligned Bounding Box)** collision detection
 - **Slightly smaller hitboxes** than sprites for forgiving gameplay
 - **Ground and ceiling** collision detection
 - **Pipe collision** with top and bottom segments
 
 ### Scoring
+
 - **+1 point** for each pipe successfully passed
 - **High score persistence** using AsyncStorage
 - **New record notification** when high score is beaten
@@ -137,11 +144,13 @@ The game is designed to be easily extensible. Common additions:
 ### Android Release
 
 1. **Generate signing key**:
+
    ```bash
    keytool -genkeypair -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
    ```
 
 2. **Configure gradle.properties**:
+
    ```
    MYAPP_RELEASE_STORE_FILE=my-release-key.keystore
    MYAPP_RELEASE_KEY_ALIAS=my-key-alias
@@ -157,6 +166,7 @@ The game is designed to be easily extensible. Common additions:
 ### iOS Release
 
 1. **Open in Xcode**:
+
    ```bash
    open ios/FlappyBirdClone.xcworkspace
    ```
@@ -169,6 +179,7 @@ The game is designed to be easily extensible. Common additions:
 ### Changing Game Parameters
 
 Edit `src/utils/physics.ts` to modify:
+
 - Gravity strength
 - Jump velocity
 - Pipe speed
@@ -178,6 +189,7 @@ Edit `src/utils/physics.ts` to modify:
 ### Styling
 
 All styles are defined using StyleSheet in each component. Key style files:
+
 - `GameScreen.tsx` - Main game layout and overlays
 - `Bird.tsx` - Bird appearance and animation
 - `Pipe.tsx` - Pipe colors and dimensions
@@ -185,6 +197,7 @@ All styles are defined using StyleSheet in each component. Key style files:
 ### Assets
 
 Replace placeholder assets in `src/assets/`:
+
 - Bird sprites (32x24px recommended)
 - Pipe textures (52px width)
 - Background images
@@ -221,6 +234,7 @@ This project is for educational purposes. Ensure you have rights to any assets u
 ## 📞 Support
 
 For issues and questions:
+
 - Check the troubleshooting section
 - Review React Native documentation
 - Open an issue in the repository

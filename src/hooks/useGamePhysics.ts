@@ -1,18 +1,18 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { BirdState, PipeState, GameState } from '../types';
-import { 
-  PHYSICS_CONFIG, 
-  SCREEN_DIMENSIONS, 
-  calculateBirdRotation, 
+import {
+  PHYSICS_CONFIG,
+  SCREEN_DIMENSIONS,
+  calculateBirdRotation,
   generateRandomPipeHeight,
   isOffScreen,
-  shouldGenerateNewPipe 
+  shouldGenerateNewPipe,
 } from '../utils/physics';
 import {
   checkBirdPipeCollision,
   checkBirdGroundCollision,
   checkBirdCeilingCollision,
-  checkBirdPassedPipe
+  checkBirdPassedPipe,
 } from '../utils/collision';
 import { getHighScore, updateHighScore } from '../utils/storage';
 
@@ -28,7 +28,7 @@ export const useGamePhysics = () => {
   const [score, setScore] = useState(0);
   const [highScore, setHighScore] = useState(0);
   const [gameState, setGameState] = useState<GameState>('START');
-  
+
   const gameLoopRef = useRef<NodeJS.Timeout>();
   const frameCountRef = useRef(0);
 
@@ -41,34 +41,11 @@ export const useGamePhysics = () => {
     loadHighScore();
   }, []);
 
-  // Game loop
-  useEffect(() => {
-    if (gameState === 'PLAYING') {
-      gameLoopRef.current = setInterval(() => {
-        frameCountRef.current += 1;
-        updateBird();
-        updatePipes();
-        checkCollisions();
-        updateScore();
-      }, 16); // ~60 FPS
-    } else {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    }
-
-    return () => {
-      if (gameLoopRef.current) {
-        clearInterval(gameLoopRef.current);
-      }
-    };
-  }, [gameState]);
-
   const updateBird = useCallback(() => {
-    setBird(prevBird => {
+    setBird((prevBird) => {
       let newVelocity = prevBird.velocity + PHYSICS_CONFIG.GRAVITY;
       newVelocity = Math.min(newVelocity, PHYSICS_CONFIG.TERMINAL_VELOCITY);
-      
+
       const newY = prevBird.y + newVelocity;
       const newRotation = calculateBirdRotation(newVelocity);
 
@@ -82,15 +59,15 @@ export const useGamePhysics = () => {
   }, []);
 
   const updatePipes = useCallback(() => {
-    setPipes(prevPipes => {
+    setPipes((prevPipes) => {
       // Move existing pipes
-      let updatedPipes = prevPipes.map(pipe => ({
+      let updatedPipes = prevPipes.map((pipe) => ({
         ...pipe,
         x: pipe.x - PHYSICS_CONFIG.PIPE_SPEED,
       }));
 
       // Remove pipes that are off-screen
-      updatedPipes = updatedPipes.filter(pipe => !isOffScreen(pipe.x));
+      updatedPipes = updatedPipes.filter((pipe) => !isOffScreen(pipe.x));
 
       // Add new pipes
       const lastPipe = updatedPipes[updatedPipes.length - 1];
@@ -111,7 +88,7 @@ export const useGamePhysics = () => {
   }, []);
 
   const checkCollisions = useCallback(() => {
-    setBird(currentBird => {
+    setBird((currentBird) => {
       // Ground collision
       if (checkBirdGroundCollision(currentBird)) {
         setGameState('GAME_OVER');
@@ -125,8 +102,8 @@ export const useGamePhysics = () => {
       }
 
       // Pipe collision
-      setPipes(currentPipes => {
-        const hasCollision = currentPipes.some(pipe => 
+      setPipes((currentPipes) => {
+        const hasCollision = currentPipes.some((pipe) =>
           checkBirdPipeCollision(currentBird, pipe)
         );
 
@@ -142,9 +119,9 @@ export const useGamePhysics = () => {
   }, []);
 
   const updateScore = useCallback(() => {
-    setPipes(prevPipes => {
+    setPipes((prevPipes) => {
       let newScore = score;
-      const updatedPipes = prevPipes.map(pipe => {
+      const updatedPipes = prevPipes.map((pipe) => {
         if (checkBirdPassedPipe(bird, pipe)) {
           pipe.passed = true;
           newScore += 1;
@@ -162,7 +139,7 @@ export const useGamePhysics = () => {
 
   const jump = useCallback(() => {
     if (gameState === 'PLAYING') {
-      setBird(prevBird => ({
+      setBird((prevBird) => ({
         ...prevBird,
         velocity: PHYSICS_CONFIG.JUMP_VELOCITY,
         rotation: -20,
@@ -215,6 +192,29 @@ export const useGamePhysics = () => {
       setGameState('PLAYING');
     }
   }, [gameState]);
+
+  // Game loop
+  useEffect(() => {
+    if (gameState === 'PLAYING') {
+      gameLoopRef.current = setInterval(() => {
+        frameCountRef.current += 1;
+        updateBird();
+        updatePipes();
+        checkCollisions();
+        updateScore();
+      }, 16); // ~60 FPS
+    } else {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+      }
+    }
+
+    return () => {
+      if (gameLoopRef.current) {
+        clearInterval(gameLoopRef.current);
+      }
+    };
+  }, [gameState, updateBird, updatePipes, checkCollisions, updateScore]);
 
   return {
     bird,

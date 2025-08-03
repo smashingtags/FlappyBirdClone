@@ -28,16 +28,19 @@ This CI/CD pipeline provides:
 ## 📋 Prerequisites
 
 ### Local Development
+
 - Docker and Docker Compose
 - Node.js 18+ (for local development)
 - Git
 
 ### CI/CD Pipeline
+
 - GitHub repository
 - GitHub Actions enabled
 - Secrets configured (see [Environment Variables](#environment-variables))
 
 ### Mobile Development (Optional for local builds)
+
 - **Android**: Android Studio, Android SDK
 - **iOS**: macOS, Xcode, CocoaPods
 
@@ -97,18 +100,21 @@ chmod +x scripts/*.sh
 ## 🐳 Docker Containers
 
 ### Base Container (`Dockerfile.base`)
+
 - Node.js 18 environment
 - React Native CLI
 - Common build tools
 - Fastlane for automation
 
 ### Android Container (`Dockerfile.android`)
+
 - Extends base container
 - Android SDK and build tools
 - Java 11
 - Gradle build system
 
 ### iOS Container (`Dockerfile.ios`)
+
 - Node.js environment
 - CocoaPods
 - Xcode command line tools (for macOS runners)
@@ -118,12 +124,14 @@ chmod +x scripts/*.sh
 ### Android Scripts
 
 #### `scripts/build-android.sh`
+
 - Builds release APK
 - Performs clean build
 - Copies artifacts to `build-artifacts/`
 - Reports build size
 
 #### `scripts/build-android-aab.sh`
+
 - Builds Android App Bundle (AAB)
 - Optimized for Google Play Store
 - Smaller download size for users
@@ -131,6 +139,7 @@ chmod +x scripts/*.sh
 ### iOS Script
 
 #### `scripts/build-ios.sh`
+
 - Creates iOS archive
 - Exports IPA file
 - Handles CocoaPods installation
@@ -168,6 +177,7 @@ The workflow (`.github/workflows/build-mobile-apps.yml`) includes:
 Configure these secrets in your GitHub repository:
 
 #### Android Signing
+
 ```
 ANDROID_KEYSTORE_FILE          # Base64 encoded keystore file
 ANDROID_KEY_ALIAS              # Key alias
@@ -176,6 +186,7 @@ ANDROID_KEY_PASSWORD           # Key password
 ```
 
 #### iOS Signing
+
 ```
 IOS_TEAM_ID                    # Apple Developer Team ID
 IOS_CERTIFICATE_P12            # Base64 encoded certificate
@@ -184,6 +195,7 @@ IOS_PROVISIONING_PROFILE       # Base64 encoded provisioning profile
 ```
 
 #### App Store Connect
+
 ```
 APP_STORE_CONNECT_API_KEY_ID   # API Key ID
 APP_STORE_CONNECT_API_ISSUER_ID # Issuer ID
@@ -191,6 +203,7 @@ APP_STORE_CONNECT_API_KEY      # Base64 encoded API key
 ```
 
 #### Google Play Console
+
 ```
 GOOGLE_PLAY_SERVICE_ACCOUNT    # Base64 encoded service account JSON
 ```
@@ -209,11 +222,13 @@ cp .env.example .env
 ### Android Signing
 
 1. **Generate Keystore**:
+
 ```bash
 keytool -genkeypair -v -keystore my-release-key.keystore -alias my-key-alias -keyalg RSA -keysize 2048 -validity 10000
 ```
 
 2. **Configure Gradle** (`android/gradle.properties`):
+
 ```properties
 MYAPP_RELEASE_STORE_FILE=my-release-key.keystore
 MYAPP_RELEASE_KEY_ALIAS=my-key-alias
@@ -222,6 +237,7 @@ MYAPP_RELEASE_KEY_PASSWORD=****
 ```
 
 3. **Update Build Gradle** (`android/app/build.gradle`):
+
 ```gradle
 android {
     signingConfigs {
@@ -254,6 +270,7 @@ android {
 ### Common Issues
 
 #### Docker Build Fails
+
 ```bash
 # Clear Docker cache
 docker system prune -a
@@ -263,6 +280,7 @@ docker-compose build --no-cache
 ```
 
 #### Android Build Fails
+
 ```bash
 # Clean Android build
 cd android && ./gradlew clean
@@ -272,6 +290,7 @@ echo $ANDROID_HOME
 ```
 
 #### iOS Build Fails
+
 ```bash
 # Clean iOS build
 cd ios && xcodebuild clean
@@ -282,6 +301,7 @@ pod install
 ```
 
 #### Permission Denied on Scripts
+
 ```bash
 # Make scripts executable
 chmod +x scripts/*.sh
@@ -290,6 +310,7 @@ chmod +x scripts/*.sh
 ### Debug Mode
 
 Enable debug logging in build scripts:
+
 ```bash
 # Add to script
 set -x  # Enable debug mode
@@ -300,13 +321,17 @@ set -x  # Enable debug mode
 ### Custom Build Configurations
 
 #### Multiple Environments
+
 Create separate Docker Compose files:
+
 - `docker-compose.dev.yml`
 - `docker-compose.staging.yml`
 - `docker-compose.prod.yml`
 
 #### Build Variants
+
 Modify build scripts for different variants:
+
 ```bash
 # Debug build
 ./gradlew assembleDebug
@@ -318,6 +343,7 @@ Modify build scripts for different variants:
 ### Optimization
 
 #### Docker Layer Caching
+
 ```dockerfile
 # Copy package files first for better caching
 COPY package*.json ./
@@ -326,6 +352,7 @@ COPY . .
 ```
 
 #### Parallel Builds
+
 ```yaml
 # GitHub Actions
 strategy:
@@ -336,7 +363,9 @@ strategy:
 ### Integration with External Services
 
 #### Slack Notifications
+
 Add to GitHub Actions:
+
 ```yaml
 - name: Notify Slack
   uses: 8398a7/action-slack@v3
@@ -346,6 +375,7 @@ Add to GitHub Actions:
 ```
 
 #### App Distribution
+
 ```yaml
 - name: Upload to Firebase App Distribution
   uses: wzieba/Firebase-Distribution-Github-Action@v1

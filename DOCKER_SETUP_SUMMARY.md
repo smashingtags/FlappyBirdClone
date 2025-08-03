@@ -5,6 +5,7 @@
 Your React Native Flappy Bird Clone project now has a complete Docker-based CI/CD pipeline! Here's what has been implemented:
 
 ### 🏗️ Project Structure
+
 ```
 FlappyBirdClone/
 ├── .dockerignore                    # Docker build optimization
@@ -27,11 +28,13 @@ FlappyBirdClone/
 ### 🐳 Docker Containers
 
 1. **Base Container** (`Dockerfile.base`)
+
    - Node.js 18 with React Native CLI
    - Common build tools and dependencies
    - Fastlane for automation
 
 2. **Android Container** (`Dockerfile.android`)
+
    - Android SDK and build tools
    - Java 11 and Gradle
    - Automated APK/AAB build scripts
@@ -53,6 +56,7 @@ FlappyBirdClone/
 ### 📋 Quick Start Commands
 
 #### Local Development
+
 ```bash
 # Start development server
 docker-compose up dev
@@ -71,6 +75,7 @@ docker-compose run --rm lint
 ```
 
 #### Direct Script Usage
+
 ```bash
 # Build Android APK
 ./scripts/build-android.sh
@@ -92,12 +97,14 @@ docker-compose run --rm lint
 ### 📱 Platform Configuration
 
 #### Android
+
 - Package: `com.flappybirdclone`
 - App Name: "Sky Dash"
 - Build Tools: Gradle with Android SDK 34
 - Output: APK and AAB formats
 
 #### iOS
+
 - Bundle ID: Ready for configuration
 - Build Tools: Xcode and CocoaPods
 - Output: IPA format
@@ -105,11 +112,13 @@ docker-compose run --rm lint
 ### 🎯 Next Steps
 
 1. **Configure Signing Keys**:
+
    - Generate Android keystore
    - Set up iOS certificates and provisioning profiles
    - Add secrets to GitHub repository
 
 2. **Test the Pipeline**:
+
    - Push code to trigger GitHub Actions
    - Verify builds complete successfully
    - Download and test generated APK/IPA files

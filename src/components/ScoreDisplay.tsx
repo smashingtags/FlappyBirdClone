@@ -7,10 +7,10 @@ interface ScoreDisplayProps {
   showHighScore?: boolean;
 }
 
-const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ 
-  score, 
-  highScore = 0, 
-  showHighScore = false 
+const ScoreDisplay: React.FC<ScoreDisplayProps> = ({
+  score,
+  highScore = 0,
+  showHighScore = false,
 }) => {
   return (
     <View style={styles.container}>

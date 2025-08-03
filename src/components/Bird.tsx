@@ -11,8 +11,8 @@ const Bird: React.FC<BirdProps> = ({ bird }) => {
     transform: [
       { translateX: bird.x },
       { translateY: bird.y },
-      { rotate: `${bird.rotation}deg` }
-    ]
+      { rotate: `${bird.rotation}deg` },
+    ],
   };
 
   return (

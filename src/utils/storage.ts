@@ -23,7 +23,9 @@ export const setHighScore = async (score: number): Promise<void> => {
   }
 };
 
-export const updateHighScore = async (currentScore: number): Promise<number> => {
+export const updateHighScore = async (
+  currentScore: number
+): Promise<number> => {
   try {
     const highScore = await getHighScore();
     if (currentScore > highScore) {
